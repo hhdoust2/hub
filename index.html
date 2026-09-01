@@ -119,18 +119,12 @@
   .jelly-card:active{
     transform:rotate(0deg) scale(1.08,.9);
   }
-  .jelly-letter{
-    font-size:clamp(1.3rem,4vw,1.9rem);
-    font-weight:800;
-    line-height:1;
-    text-shadow:0 2px 6px rgba(0,0,0,.22);
-  }
   .jelly-label{
-    font-size:clamp(.72rem,1.6vw,.86rem);
-    font-weight:500;
+    font-size:clamp(.86rem,2.2vw,1.15rem);
+    font-weight:700;
     text-align:center;
     max-width:92%;
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
     text-shadow:0 1px 4px rgba(0,0,0,.2);
   }
 
@@ -197,6 +191,26 @@
   .field input::placeholder{color:#786e93;}
   .field-error{color:var(--danger);font-size:.8rem;margin:0;}
   .add-form .btn-primary{align-self:flex-start;margin-top:2px;}
+
+  .backup-row{
+    display:flex;flex-wrap:wrap;gap:8px;
+    padding:12px 0;margin-top:2px;
+    border-top:1px solid var(--border);
+  }
+  .btn-secondary{
+    background:transparent;color:var(--text);
+    border:1px solid var(--border);border-radius:11px;
+    padding:9px 14px;font-weight:600;font-size:.84rem;
+    cursor:pointer;transition:background .15s ease, transform .15s ease;
+  }
+  .btn-secondary:hover{background:var(--surface-2);}
+  .btn-secondary:active{transform:scale(.97);}
+  .restore-confirm{
+    display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+    font-size:.85rem;color:var(--text-dim);width:100%;
+  }
+  .restore-confirm .btn-primary, .restore-confirm .btn-secondary{padding:7px 14px;font-size:.82rem;}
+  .backup-error{color:var(--danger);font-size:.8rem;width:100%;margin:0;}
 
   .link-list{
     list-style:none;margin:14px 0 4px;padding:0;
@@ -272,6 +286,9 @@
       <button type="submit" class="btn-primary">افزودن</button>
     </form>
 
+    <div class="backup-row" id="backupSection"></div>
+    <input type="file" id="restoreInput" accept="application/json" hidden>
+
     <ul class="link-list" id="linkList"></ul>
   </div>
 </div>
@@ -296,6 +313,8 @@ let links = [];
 let loaded = false;
 let editingId = null;
 let confirmDeleteId = null;
+let pendingRestore = null;
+let backupError = '';
 
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -349,6 +368,7 @@ function deleteLink(id){
 function renderAll(isInitial){
   renderGrid(isInitial);
   renderSettingsList();
+  renderBackupSection();
 }
 
 function renderGrid(isInitial){
@@ -376,15 +396,10 @@ function renderGrid(isInitial){
     if(isInitial) btn.style.setProperty('--delay', (i*40)+'ms');
     btn.setAttribute('aria-label', 'باز کردن ' + link.title);
 
-    const letter = document.createElement('span');
-    letter.className = 'jelly-letter';
-    letter.textContent = (link.title.trim().charAt(0) || '؟').toUpperCase();
-
     const label = document.createElement('span');
     label.className = 'jelly-label';
     label.textContent = link.title;
 
-    btn.appendChild(letter);
     btn.appendChild(label);
     btn.addEventListener('click', ()=> window.open(link.url, '_blank', 'noopener'));
     grid.appendChild(btn);
@@ -460,6 +475,88 @@ function renderSettingsList(){
   });
 }
 
+function renderBackupSection(){
+  const box = document.getElementById('backupSection');
+  if(!box) return;
+
+  if(pendingRestore){
+    box.innerHTML =
+      '<span class="restore-confirm">'+
+        '<span>'+pendingRestore.length+' پیوند از فایل پشتیبان جایگزین لیست فعلی شود؟</span>'+
+        '<button type="button" class="btn-primary" id="confirmRestoreBtn">بله، جایگزین شود</button>'+
+        '<button type="button" class="btn-secondary" id="cancelRestoreBtn">انصراف</button>'+
+      '</span>';
+    document.getElementById('confirmRestoreBtn').addEventListener('click', applyRestore);
+    document.getElementById('cancelRestoreBtn').addEventListener('click', ()=>{
+      pendingRestore = null; renderBackupSection();
+    });
+    return;
+  }
+
+  box.innerHTML =
+    '<button type="button" class="btn-secondary" id="backupBtn">پشتیبان‌گیری</button>'+
+    '<button type="button" class="btn-secondary" id="restoreBtn">بازیابی از فایل</button>'+
+    (backupError ? '<p class="backup-error">'+escapeHtml(backupError)+'</p>' : '');
+
+  document.getElementById('backupBtn').addEventListener('click', downloadBackup);
+  document.getElementById('restoreBtn').addEventListener('click', ()=>{
+    document.getElementById('restoreInput').click();
+  });
+}
+
+function downloadBackup(){
+  const data = links.map(l=>({title:l.title, url:l.url}));
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'links-backup.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+document.getElementById('restoreInput').addEventListener('change', function(e){
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  backupError = '';
+  const reader = new FileReader();
+  reader.onload = function(){
+    try{
+      const data = JSON.parse(reader.result);
+      if(!Array.isArray(data)) throw new Error('invalid');
+      const cleaned = data
+        .filter(d => d && typeof d.title === 'string' && typeof d.url === 'string' && d.title.trim() && d.url.trim())
+        .map(d => ({title: d.title.trim(), url: normalizeUrl(d.url.trim())}))
+        .filter(d => isValidUrl(d.url));
+      if(cleaned.length === 0){
+        backupError = 'فایل معتبر نیست یا پیوندی در آن نبود.';
+        renderBackupSection();
+        return;
+      }
+      pendingRestore = cleaned;
+      renderBackupSection();
+    }catch(err){
+      backupError = 'فایل معتبر نیست.';
+      renderBackupSection();
+    }
+  };
+  reader.readAsText(file);
+});
+
+function applyRestore(){
+  links = pendingRestore.map((d, i) => ({
+    id: 'l'+Date.now()+Math.random().toString(36).slice(2,7)+i,
+    title: d.title,
+    url: d.url,
+    color: i % PALETTE.length
+  }));
+  pendingRestore = null;
+  saveLinks();
+  renderAll(true);
+}
+
 function showFormError(msg){
   const err = document.getElementById('formError');
   err.textContent = msg;
@@ -486,8 +583,9 @@ document.getElementById('addForm').addEventListener('submit', function(e){
 });
 
 function openSettings(){
-  editingId = null; confirmDeleteId = null;
+  editingId = null; confirmDeleteId = null; pendingRestore = null; backupError = '';
   renderSettingsList();
+  renderBackupSection();
   document.getElementById('overlay').hidden = false;
   document.getElementById('titleInput').focus();
 }
