@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پیوندهای من</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-top:#271c3f;
+    --bg-bottom:#130d20;
+    --surface:#2a2140;
+    --surface-2:#231a38;
+    --border:rgba(255,255,255,.09);
+    --text:#f3eefb;
+    --text-dim:#b3a8cf;
+    --accent:#8ea7ff;
+    --accent-ink:#1a2340;
+    --danger:#ff6b6b;
+    --radius-chrome:20px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    font-family:"Vazirmatn","Tahoma",sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(560px 420px at 85% -5%, rgba(142,167,255,.16), transparent 60%),
+      radial-gradient(520px 420px at -5% 100%, rgba(255,77,109,.14), transparent 60%),
+      linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+    background-attachment:fixed;
+  }
+  button{font-family:inherit;}
+  .page{max-width:1400px;margin:0 auto;padding:22px 20px 60px;}
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:6px 2px 26px;
+  }
+  .brand{
+    font-size:clamp(1.3rem,2.4vw,1.7rem);
+    font-weight:700;
+    margin:0;
+    letter-spacing:.2px;
+  }
+  .icon-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:42px;height:42px;border-radius:14px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:transform .15s ease, color .15s ease, background .15s ease;
+  }
+  .icon-btn:hover{color:var(--text);background:var(--surface-2);}
+  .icon-btn:active{transform:scale(.92);}
+  .icon-btn:focus-visible, .jelly-card:focus-visible, .btn-primary:focus-visible, input:focus-visible{
+    outline:2px solid var(--accent);outline-offset:2px;
+  }
+  .icon-btn.small{width:34px;height:34px;border-radius:10px;flex:none;}
+  .icon-btn.danger{color:var(--danger);}
+
+  /* ---- grid & jelly cards ---- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+  }
+  @media (min-width:640px){
+    .grid{grid-template-columns:repeat(4,1fr);gap:16px;}
+  }
+  @media (min-width:960px){
+    .grid{grid-template-columns:repeat(6,1fr);gap:20px;}
+    .jelly-card{aspect-ratio:4/3;}
+  }
+  @media (min-width:1400px){
+    .grid{grid-template-columns:repeat(8,1fr);}
+  }
+
+  .jelly-card{
+    --c-base:#ff4d6d;--c-light:#ff8fa3;
+    position:relative;
+    aspect-ratio:1/1.05;
+    border:none;
+    cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;
+    padding:10px;
+    color:#fff9f0;
+    background:linear-gradient(155deg, var(--c-light) 0%, var(--c-base) 62%);
+    border-radius:42% 38% 40% 44% / 46% 42% 46% 40%;
+    box-shadow:
+      0 10px 22px -8px color-mix(in srgb, var(--c-base) 65%, transparent),
+      inset 0 -6px 10px -4px rgba(0,0,0,.18);
+    transform:rotate(var(--tilt,0deg));
+    transition:transform .32s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease;
+  }
+  .jelly-card:nth-child(6n+1){--tilt:-2deg;}
+  .jelly-card:nth-child(6n+2){--tilt:1.5deg;}
+  .jelly-card:nth-child(6n+3){--tilt:-1deg;}
+  .jelly-card:nth-child(6n+4){--tilt:2deg;}
+  .jelly-card:nth-child(6n+5){--tilt:-1.5deg;}
+  .jelly-card:nth-child(6n+6){--tilt:1deg;}
+  .jelly-card::before{
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    background:radial-gradient(ellipse 60% 40% at 28% 20%, rgba(255,255,255,.55), transparent 70%);
+    pointer-events:none;
+  }
+  .jelly-card:hover{
+    transform:rotate(0deg) scale(1.05) translateY(-2px);
+    box-shadow:
+      0 16px 28px -10px color-mix(in srgb, var(--c-base) 70%, transparent),
+      inset 0 -6px 10px -4px rgba(0,0,0,.18);
+  }
+  .jelly-card:active{
+    transform:rotate(0deg) scale(1.08,.9);
+  }
+  .jelly-letter{
+    font-size:clamp(1.3rem,4vw,1.9rem);
+    font-weight:800;
+    line-height:1;
+    text-shadow:0 2px 6px rgba(0,0,0,.22);
+  }
+  .jelly-label{
+    font-size:clamp(.72rem,1.6vw,.86rem);
+    font-weight:500;
+    text-align:center;
+    max-width:92%;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    text-shadow:0 1px 4px rgba(0,0,0,.2);
+  }
+
+  .jelly-card.enter{
+    animation:pop .5s cubic-bezier(.34,1.56,.64,1) both;
+    animation-delay:var(--delay,0ms);
+  }
+  @keyframes pop{
+    from{opacity:0;transform:scale(.6) rotate(var(--tilt,0deg));}
+    to{opacity:1;transform:scale(1) rotate(var(--tilt,0deg));}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .jelly-card, .jelly-card.enter{animation:none !important;transition:none !important;}
+  }
+
+  /* ---- empty state ---- */
+  .empty-state{
+    text-align:center;padding:70px 20px;color:var(--text-dim);
+  }
+  .empty-state p{margin:0 0 18px;font-size:1rem;}
+
+  .btn-primary{
+    background:var(--accent);color:var(--accent-ink);
+    border:none;border-radius:12px;
+    padding:11px 22px;font-weight:700;font-size:.94rem;
+    cursor:pointer;transition:filter .15s ease, transform .15s ease;
+  }
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-primary:active{transform:scale(.97);}
+
+  /* ---- settings modal ---- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(10,7,18,.6);
+    backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;z-index:20;
+  }
+  .modal{
+    width:100%;max-width:460px;max-height:86vh;
+    display:flex;flex-direction:column;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-chrome);
+    padding:20px 20px 12px;
+  }
+  .modal-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .modal-head h2{font-size:1.06rem;margin:0;font-weight:700;}
+
+  .add-form{display:flex;flex-direction:column;gap:10px;margin-bottom:6px;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:.8rem;color:var(--text-dim);}
+  .field input{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:11px;
+    padding:10px 12px;
+    font-size:.92rem;
+    font-family:inherit;
+  }
+  .field input::placeholder{color:#786e93;}
+  .field-error{color:var(--danger);font-size:.8rem;margin:0;}
+  .add-form .btn-primary{align-self:flex-start;margin-top:2px;}
+
+  .link-list{
+    list-style:none;margin:14px 0 4px;padding:0;
+    overflow-y:auto;
+    border-top:1px solid var(--border);
+    padding-top:8px;
+  }
+  .link-row{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 2px;
+    border-bottom:1px solid var(--border);
+  }
+  .link-row:last-child{border-bottom:none;}
+  .dot{width:10px;height:10px;border-radius:50%;flex:none;}
+  .row-title{
+    flex:1;font-size:.9rem;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .confirm-text{color:var(--danger);font-size:.85rem;}
+  .row-edit{flex:1;display:flex;flex-direction:column;gap:6px;}
+  .row-edit input{
+    background:var(--surface-2);border:1px solid var(--border);
+    color:var(--text);border-radius:8px;padding:6px 9px;font-size:.84rem;font-family:inherit;
+  }
+  .list-empty{color:var(--text-dim);font-size:.86rem;padding:14px 2px;text-align:center;}
+
+  .status{color:var(--text-dim);font-size:.9rem;padding:30px 4px;text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header class="topbar">
+    <h1 class="brand">پیوندهای من</h1>
+    <button class="icon-btn" id="openSettings" aria-label="تنظیمات">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="7.5"/>
+        <line x1="12" y1="2" x2="12" y2="4.2"/><line x1="12" y1="19.8" x2="12" y2="22"/>
+        <line x1="2" y1="12" x2="4.2" y2="12"/><line x1="19.8" y1="12" x2="22" y2="12"/>
+        <line x1="4.9" y1="4.9" x2="6.4" y2="6.4"/><line x1="17.6" y1="17.6" x2="19.1" y2="19.1"/>
+        <line x1="19.1" y1="4.9" x2="17.6" y2="6.4"/><line x1="6.4" y1="17.6" x2="4.9" y2="19.1"/>
+      </svg>
+    </button>
+  </header>
+
+  <p class="status" id="statusMsg">در حال بارگذاری…</p>
+  <main class="grid" id="grid" hidden></main>
+  <div class="empty-state" id="emptyState" hidden>
+    <p>هنوز پیوندی اضافه نکرده‌اید</p>
+    <button class="btn-primary" id="emptyAddBtn">افزودن پیوند</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <h2 id="modalTitle">تنظیمات پیوندها</h2>
+      <button class="icon-btn small" id="closeSettings" aria-label="بستن">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+      </button>
+    </div>
+
+    <form class="add-form" id="addForm">
+      <div class="field">
+        <label for="titleInput">عنوان</label>
+        <input id="titleInput" type="text" placeholder="مثلاً یوتیوب" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="urlInput">آدرس</label>
+        <input id="urlInput" type="text" placeholder="example.com" autocomplete="off">
+      </div>
+      <p class="field-error" id="formError" hidden></p>
+      <button type="submit" class="btn-primary">افزودن</button>
+    </form>
+
+    <ul class="link-list" id="linkList"></ul>
+  </div>
+</div>
+
+<script>
+const ICON_PENCIL = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 10-10-3-3L5 16l-1 4z"/><line x1="14" y1="6" x2="17" y2="9"/></svg>';
+const ICON_TRASH = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
+const ICON_CHECK = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>';
+const ICON_X = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>';
+
+const STORAGE_KEY = 'jelly-links-v1';
+const PALETTE = [
+  {base:'#ff4d6d', light:'#ff8fa3'},
+  {base:'#ff9f1c', light:'#ffc46b'},
+  {base:'#7bb825', light:'#b7de6b'},
+  {base:'#3a86ff', light:'#7db0ff'},
+  {base:'#8338ec', light:'#b37cf5'},
+  {base:'#05a889', light:'#4fe0b5'},
+];
+
+let links = [];
+let loaded = false;
+let editingId = null;
+let confirmDeleteId = null;
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function normalizeUrl(raw){
+  let u = raw.trim();
+  if(!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  return u;
+}
+function isValidUrl(u){
+  try{ new URL(u); return true; }catch(e){ return false; }
+}
+
+async function loadLinks(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    links = (res && res.value) ? JSON.parse(res.value) : [];
+  }catch(e){
+    links = [];
+  }
+  loaded = true;
+  renderAll(true);
+}
+async function saveLinks(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(links), false);
+  }catch(e){
+    console.error('ذخیره‌سازی ناموفق بود', e);
+  }
+}
+
+function addLink(title, url){
+  const color = links.length % PALETTE.length;
+  links.push({id:'l'+Date.now()+Math.random().toString(36).slice(2,7), title, url, color});
+  saveLinks();
+  renderAll(false);
+}
+function updateLink(id, title, url){
+  const item = links.find(l=>l.id===id);
+  if(item){ item.title=title; item.url=url; saveLinks(); }
+  editingId = null;
+  renderAll(false);
+}
+function deleteLink(id){
+  links = links.filter(l=>l.id!==id);
+  confirmDeleteId = null;
+  saveLinks();
+  renderAll(false);
+}
+
+function renderAll(isInitial){
+  renderGrid(isInitial);
+  renderSettingsList();
+}
+
+function renderGrid(isInitial){
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('emptyState');
+  const status = document.getElementById('statusMsg');
+  status.hidden = true;
+  grid.innerHTML = '';
+
+  if(links.length === 0){
+    grid.hidden = true;
+    empty.hidden = false;
+    return;
+  }
+  empty.hidden = true;
+  grid.hidden = false;
+
+  links.forEach((link, i)=>{
+    const c = PALETTE[link.color % PALETTE.length];
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'jelly-card' + (isInitial ? ' enter' : '');
+    btn.style.setProperty('--c-base', c.base);
+    btn.style.setProperty('--c-light', c.light);
+    if(isInitial) btn.style.setProperty('--delay', (i*40)+'ms');
+    btn.setAttribute('aria-label', 'باز کردن ' + link.title);
+
+    const letter = document.createElement('span');
+    letter.className = 'jelly-letter';
+    letter.textContent = (link.title.trim().charAt(0) || '؟').toUpperCase();
+
+    const label = document.createElement('span');
+    label.className = 'jelly-label';
+    label.textContent = link.title;
+
+    btn.appendChild(letter);
+    btn.appendChild(label);
+    btn.addEventListener('click', ()=> window.open(link.url, '_blank', 'noopener'));
+    grid.appendChild(btn);
+  });
+}
+
+function renderSettingsList(){
+  const list = document.getElementById('linkList');
+  list.innerHTML = '';
+
+  if(links.length === 0){
+    const li = document.createElement('li');
+    li.className = 'list-empty';
+    li.textContent = 'هنوز پیوندی وجود ندارد.';
+    list.appendChild(li);
+    return;
+  }
+
+  links.forEach(link=>{
+    const c = PALETTE[link.color % PALETTE.length];
+    const li = document.createElement('li');
+    li.className = 'link-row';
+
+    if(editingId === link.id){
+      li.innerHTML =
+        '<span class="dot" style="background:'+c.base+'"></span>'+
+        '<div class="row-edit">'+
+          '<input type="text" class="edit-title" value="'+escapeHtml(link.title)+'">'+
+          '<input type="text" class="edit-url" value="'+escapeHtml(link.url)+'">'+
+        '</div>'+
+        '<button class="icon-btn small confirm-save" aria-label="ذخیره">'+ICON_CHECK+'</button>'+
+        '<button class="icon-btn small cancel-edit" aria-label="انصراف">'+ICON_X+'</button>';
+
+      li.querySelector('.confirm-save').addEventListener('click', ()=>{
+        const t = li.querySelector('.edit-title').value.trim();
+        let u = li.querySelector('.edit-url').value.trim();
+        if(!t || !u) return;
+        u = normalizeUrl(u);
+        if(!isValidUrl(u)) return;
+        updateLink(link.id, t, u);
+      });
+      li.querySelector('.cancel-edit').addEventListener('click', ()=>{
+        editingId = null; renderSettingsList();
+      });
+
+    } else if(confirmDeleteId === link.id){
+      li.innerHTML =
+        '<span class="dot" style="background:'+c.base+'"></span>'+
+        '<span class="row-title confirm-text">حذف شود؟</span>'+
+        '<button class="icon-btn small danger confirm-del" aria-label="بله، حذف کن">بله</button>'+
+        '<button class="icon-btn small cancel-del" aria-label="انصراف">خیر</button>';
+
+      li.querySelector('.confirm-del').addEventListener('click', ()=> deleteLink(link.id));
+      li.querySelector('.cancel-del').addEventListener('click', ()=>{
+        confirmDeleteId = null; renderSettingsList();
+      });
+
+    } else {
+      li.innerHTML =
+        '<span class="dot" style="background:'+c.base+'"></span>'+
+        '<span class="row-title">'+escapeHtml(link.title)+'</span>'+
+        '<button class="icon-btn small edit-btn" aria-label="ویرایش">'+ICON_PENCIL+'</button>'+
+        '<button class="icon-btn small del-btn" aria-label="حذف">'+ICON_TRASH+'</button>';
+
+      li.querySelector('.edit-btn').addEventListener('click', ()=>{
+        editingId = link.id; confirmDeleteId = null; renderSettingsList();
+      });
+      li.querySelector('.del-btn').addEventListener('click', ()=>{
+        confirmDeleteId = link.id; editingId = null; renderSettingsList();
+      });
+    }
+    list.appendChild(li);
+  });
+}
+
+function showFormError(msg){
+  const err = document.getElementById('formError');
+  err.textContent = msg;
+  err.hidden = false;
+}
+
+document.getElementById('addForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const titleInput = document.getElementById('titleInput');
+  const urlInput = document.getElementById('urlInput');
+  const err = document.getElementById('formError');
+  err.hidden = true;
+
+  const title = titleInput.value.trim();
+  let url = urlInput.value.trim();
+  if(!title || !url){ showFormError('عنوان و آدرس را وارد کنید'); return; }
+  url = normalizeUrl(url);
+  if(!isValidUrl(url)){ showFormError('آدرس معتبر نیست'); return; }
+
+  addLink(title, url);
+  titleInput.value = '';
+  urlInput.value = '';
+  titleInput.focus();
+});
+
+function openSettings(){
+  editingId = null; confirmDeleteId = null;
+  renderSettingsList();
+  document.getElementById('overlay').hidden = false;
+  document.getElementById('titleInput').focus();
+}
+function closeSettings(){
+  document.getElementById('overlay').hidden = true;
+}
+document.getElementById('openSettings').addEventListener('click', openSettings);
+document.getElementById('emptyAddBtn').addEventListener('click', openSettings);
+document.getElementById('closeSettings').addEventListener('click', closeSettings);
+document.getElementById('overlay').addEventListener('click', function(e){
+  if(e.target.id === 'overlay') closeSettings();
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && !document.getElementById('overlay').hidden) closeSettings();
+});
+
+loadLinks();
+</script>
+</body>
+</html>
