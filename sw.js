@@ -19,25 +19,12 @@ const CACHE_VERSION = 'aichat-shell-v3';
 const APP_SHELL = [
     '/',
     '/index.html',
-    '/style.css',
-    '/manifest.json',
-    '/js/main.js',
-    '/js/ui.js',
-    '/js/chat.js',
-    '/js/config.js',
-    '/js/db.js',
-    '/js/files.js',
-    '/js/image.js',
-    '/js/video.js',
-    '/js/render.js',
-    '/js/search.js',
-    '/js/utils.js',
+    
     '/icons/icon-192.png',
     '/icons/icon-512.png',
 ];
 
-// مسیرهایی که هرگز نباید توسط سرویس‌ورکر دست‌خورده بشن (پراکسی زنده/استریم).
-const NEVER_INTERCEPT = ['/chat-ai', '/search-web', '/generate-image', '/generate-video'];
+
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
