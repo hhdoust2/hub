@@ -1,7 +1,7 @@
 {
-  "short_name": "مدیریت API",
-  "name": "مدیریت API Keyها و ارائه‌دهنده‌ها",
-  "description": "مدیریت و تست کلیدهای API و سرویس‌های هوش مصنوعی",
+  "short_name": "مدیریت لینکها",
+  "name": "هاب و مدیریت لینم ها",
+  "description": "مدیریت لینکها ",
   "id": "./index.html",
   "icons": [
     {
