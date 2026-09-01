@@ -23,6 +23,7 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  [hidden]{display:none !important;}
   body{
     min-height:100vh;
     font-family:"Vazirmatn","Tahoma",sans-serif;
@@ -308,19 +309,19 @@ function isValidUrl(u){
   try{ new URL(u); return true; }catch(e){ return false; }
 }
 
-async function loadLinks(){
+function loadLinks(){
   try{
-    const res = await window.storage.get(STORAGE_KEY, false);
-    links = (res && res.value) ? JSON.parse(res.value) : [];
+    const raw = localStorage.getItem(STORAGE_KEY);
+    links = raw ? JSON.parse(raw) : [];
   }catch(e){
     links = [];
   }
   loaded = true;
   renderAll(true);
 }
-async function saveLinks(){
+function saveLinks(){
   try{
-    await window.storage.set(STORAGE_KEY, JSON.stringify(links), false);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
   }catch(e){
     console.error('ذخیره‌سازی ناموفق بود', e);
   }
