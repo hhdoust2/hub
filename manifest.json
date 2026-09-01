@@ -1,0 +1,32 @@
+{
+  "short_name": "مدیریت API",
+  "name": "مدیریت API Keyها و ارائه‌دهنده‌ها",
+  "description": "مدیریت و تست کلیدهای API و سرویس‌های هوش مصنوعی",
+  "id": "./index.html",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1041/1041886.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1041/1041886.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1041/1041886.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "scope": "./",
+  "background_color": "#faf8f6",
+  "theme_color": "#faf8f6",
+  "display": "standalone",
+  "orientation": "portrait"
+}
