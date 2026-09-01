@@ -1,30 +1,23 @@
-// سرویس‌ورکر PWA — «پوسته‌ی اپ» (HTML/CSS/JS/آیکون‌ها) رو کش می‌کنه تا اپ حتی
-// بدون اینترنت هم بالا بیاد.
+// سرویس‌ورکر PWA — «پوسته‌ی اپ» رو کش می‌کنه تا بعد از یک بار باز شدن،
+// حتی بدون اینترنت هم بالا بیاد. لینک‌های خودِ کاربر توی localStorage
+// ذخیره می‌شن (نه این‌جا)، پس آفلاین‌بودن روی داده‌ها اثری نداره.
 //
-// نکته‌ی مهم درباره‌ی استراتژی کش: عمداً «network-first» انتخاب شده (نه
-// cache-first) — یعنی هر بار اول از خودِ سرور می‌خونه و کش رو فقط به‌عنوان
-// fallback برای حالت آفلاین نگه می‌داره. دلیلش: چون این اپ مدام آپدیت می‌شه،
-// cache-first باعث می‌شد بعد از هر دیپلوی جدید، گوشیِ کاربر همچنان نسخه‌ی
-// قدیمیِ کش‌شده‌ی JS رو اجرا کنه (و دکمه‌های تازه‌اضافه‌شده بی‌واکنش بمونن) —
-// این باگ دقیقاً همینه که این فایل داره حلش می‌کنه.
-//
-// نکته‌ی امنیتی/عملکردیِ دیگه: مسیرهای API (/chat-ai، /search-web،
-// /generate-image) هرگز کش یا رهگیری نمی‌شن — چون پاسخ چت به‌صورت استریم
-// (SSE) میاد و هر پیام حاوی کلید API و محتوای خصوصیِ کاربره؛ این مسیرها باید
-// همیشه مستقیم به شبکه برن.
+// استراتژی کش عمداً «network-first»ه (نه cache-first): هر بار اول از
+// خودِ سرور می‌خونه و کش رو فقط به‌عنوان fallback برای حالت آفلاین نگه
+// می‌داره. دلیلش: اگه بعداً این فایل‌ها آپدیت بشن، cache-first باعث می‌شد
+// گوشیِ کاربر همچنان نسخه‌ی قدیمی رو اجرا کنه.
 
-// هر بار که تغییر محسوسی توی فایل‌های اپ می‌دیم، این نسخه رو دستی بالا
-// می‌بریم تا کشِ قدیمی به‌طور کامل پاک بشه (نه فقط بازنویسیِ تدریجی).
-const CACHE_VERSION = 'aichat-shell-v3';
+// هر بار تغییر محسوسی توی فایل‌های اپ دادید، این نسخه رو دستی بالا ببرید
+// تا کشِ قدیمی به‌طور کامل پاک بشه.
+const CACHE_VERSION = 'jelly-links-shell-v1';
 const APP_SHELL = [
-    '/',
-    '/index.html',
-    
-    '/icons/icon-192.png',
-    '/icons/icon-512.png',
+    './',
+    './index.html',
+    './manifest.json',
+    './icons/icon-192.png',
+    './icons/icon-512.png',
+    './icons/icon-maskable-512.png',
 ];
-
-
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -33,8 +26,6 @@ self.addEventListener('install', (event) => {
             // کلاً fail بشه.
         })
     );
-    // فوراً جایگزینِ سرویس‌ورکر قبلی می‌شه، بدون منتظرموندن برای بسته‌شدنِ
-    // تمام تب‌های بازِ اپ.
     self.skipWaiting();
 });
 
@@ -44,31 +35,17 @@ self.addEventListener('activate', (event) => {
             Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
         )
     );
-    // کنترل تمام تب‌های بازِ اپ رو فوراً به‌دست می‌گیره (به‌جای اینکه فقط
-    // بارگذاری‌های بعدی رو کنترل کنه) — همراه با کدِ controllerchange توی
-    // main.js، همین باعث می‌شه تب‌های بازِ قدیمی هم خودکار رفرش بشن.
     self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // فقط درخواست‌های GET هم‌مبدأ رو مدیریت می‌کنیم؛ بقیه (POST، CDNهای
-    // خارجی، مسیرهای زنده‌ی بالا) دست‌نخورده به شبکه می‌رن.
+    // فقط درخواست‌های GET هم‌مبدأ رو مدیریت می‌کنیم؛ فونت‌های خارجی
+    // (Google Fonts) و بقیه دست‌نخورده به شبکه می‌رن.
     if (event.request.method !== 'GET') return;
     if (url.origin !== self.location.origin) return;
-    if (NEVER_INTERCEPT.some((p) => url.pathname.startsWith(p))) return;
 
-    // Network-first برای همه‌ی فایل‌های پوسته‌ی اپ (HTML/CSS/JS/آیکون): اول
-    // از سرور می‌خونه (همیشه آخرین نسخه)، و فقط وقتی آفلاینه یا شبکه خطا داد
-    // می‌ره سراغ کش.
-    //
-    // نکته‌ی مهم: علاوه بر کشِ خودِ سرویس‌ورکر (که بالا مدیریتش می‌کنیم)، خودِ
-    // مرورگر هم یه HTTP cache جداگانه داره که می‌تونه به fetch() زیر جواب
-    // کهنه بده، حتی وقتی این کد صریحاً از شبکه می‌خواد بخونه. برای همین با
-    // { cache: 'no-store' } دقیقاً همون HTTP cache مرورگر رو هم دور می‌زنیم —
-    // این باعث می‌شه بعد از هر دیپلوی، همون بار اول (بدون نیاز به پاک‌کردنِ
-    // دستیِ کش) آخرین نسخه بیاد.
     const freshRequest = new Request(event.request, { cache: 'no-store' });
 
     event.respondWith(
@@ -80,6 +57,6 @@ self.addEventListener('fetch', (event) => {
                 }
                 return res;
             })
-            .catch(() => caches.match(event.request).then((res) => res || (event.request.mode === 'navigate' ? caches.match('/index.html') : undefined)))
+            .catch(() => caches.match(event.request).then((res) => res || (event.request.mode === 'navigate' ? caches.match('./index.html') : undefined)))
     );
 });

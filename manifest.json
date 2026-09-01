@@ -1,32 +1,33 @@
 {
-  "short_name": "مدیریت لینکها",
-  "name": "هاب و مدیریت لینم ها",
-  "description": "مدیریت لینکها ",
-  "id": "./index.html",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/1041/1041886.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/1041/1041886.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/1041/1041886.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "maskable"
-    }
-  ],
+  "name": "پیوندهای من",
+  "short_name": "پیوندها",
+  "description": "میانبرهای شخصی من — با یک لمس هرکدوم رو باز کن",
+  "lang": "fa",
+  "dir": "rtl",
   "start_url": "./index.html",
   "scope": "./",
-  "background_color": "#faf8f6",
-  "theme_color": "#faf8f6",
   "display": "standalone",
-  "orientation": "portrait"
+  "orientation": "portrait-primary",
+  "background_color": "#1b1430",
+  "theme_color": "#1b1430",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
 }
