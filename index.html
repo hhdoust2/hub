@@ -71,6 +71,8 @@
   }
   .icon-btn.small{width:34px;height:34px;border-radius:10px;flex:none;}
   .icon-btn.danger{color:var(--danger);}
+  .icon-btn:disabled{opacity:.3;cursor:not-allowed;}
+  .icon-btn:disabled:hover{background:var(--surface);color:var(--text-dim);}
 
   .topbar-actions{display:flex;align-items:center;gap:8px;}
   .install-btn{
@@ -103,6 +105,7 @@
   .jelly-card{
     --c-base:#ff4d6d;--c-light:#ff8fa3;
     position:relative;
+    width:100%;
     aspect-ratio:1/1.05;
     border:none;
     cursor:pointer;
@@ -325,6 +328,8 @@ const ICON_PENCIL = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none"
 const ICON_TRASH = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>';
 const ICON_X = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>';
+const ICON_UP = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>';
+const ICON_DOWN = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 
 const STORAGE_KEY = 'jelly-links-v1';
 const PALETTE = [
@@ -391,6 +396,16 @@ function deleteLink(id){
   saveLinks();
   renderAll(false);
 }
+function moveLink(id, direction){
+  const idx = links.findIndex(l=>l.id===id);
+  const newIdx = idx + direction;
+  if(idx === -1 || newIdx < 0 || newIdx >= links.length) return;
+  const tmp = links[idx];
+  links[idx] = links[newIdx];
+  links[newIdx] = tmp;
+  saveLinks();
+  renderAll(false);
+}
 
 function renderAll(isInitial){
   renderGrid(isInitial);
@@ -445,7 +460,7 @@ function renderSettingsList(){
     return;
   }
 
-  links.forEach(link=>{
+  links.forEach((link, idx)=>{
     const c = PALETTE[link.color % PALETTE.length];
     const li = document.createElement('li');
     li.className = 'link-row';
@@ -488,9 +503,13 @@ function renderSettingsList(){
       li.innerHTML =
         '<span class="dot" style="background:'+c.base+'"></span>'+
         '<span class="row-title">'+escapeHtml(link.title)+'</span>'+
+        '<button class="icon-btn small up-btn" aria-label="جابجایی به بالا"'+(idx===0?' disabled':'')+'>'+ICON_UP+'</button>'+
+        '<button class="icon-btn small down-btn" aria-label="جابجایی به پایین"'+(idx===links.length-1?' disabled':'')+'>'+ICON_DOWN+'</button>'+
         '<button class="icon-btn small edit-btn" aria-label="ویرایش">'+ICON_PENCIL+'</button>'+
         '<button class="icon-btn small del-btn" aria-label="حذف">'+ICON_TRASH+'</button>';
 
+      li.querySelector('.up-btn').addEventListener('click', ()=> moveLink(link.id, -1));
+      li.querySelector('.down-btn').addEventListener('click', ()=> moveLink(link.id, 1));
       li.querySelector('.edit-btn').addEventListener('click', ()=>{
         editingId = link.id; confirmDeleteId = null; renderSettingsList();
       });
